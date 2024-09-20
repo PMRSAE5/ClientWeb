@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@tailwind utilities;
+
+@layer utilities {
+  .color-navbar {
+    background-color: #5489ce;
+  }
+}
