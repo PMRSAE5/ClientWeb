@@ -13,5 +13,6 @@ En cas de problème liées a react-scripts :
 npm install react-scripts
 
 Les bibliothèques utilisés : 
-React Router
-Tailwind CSS 
+React Router,
+Tailwind CSS, 
+React Bootstrapp
