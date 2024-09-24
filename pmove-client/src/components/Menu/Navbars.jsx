@@ -21,7 +21,7 @@ const Navbars = () => {
         </div>
       </div>
 
-      <div className="mt-2 font-raleway color-blues h-24 xl:w-[78%] p-2 relative flex items-center justify-center ">
+      <div className="mt-2 font-raleway color-blues h-24 w-[78%] p-2 relative flex items-center justify-center ">
         <div className="absolute -right-12">
           <img src={Intersect} alt="Intersect" className="mt-22 h-24" />
         </div>
@@ -39,7 +39,7 @@ const Navbars = () => {
               id="navbarScroll"
               className="flex items-center justify-between w-full"
             >
-              <Nav className="flex items-center xl:space-x-20">
+              <Nav className="flex items-center lg:space-x-12 xl:space-x-20">
                 <Link
                   to=""
                   className="!font-bold text-white !text-xl hover:text-gray-400 nav-link"
