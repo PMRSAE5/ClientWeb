@@ -7,6 +7,7 @@ import Signup from "./components/Menu/Signup";
 import Reservation from "./components/Menu/Reservation";
 import Footer from "./components/Menu/Footer";
 import Navbar from "./components/Menu/Navbars";
+import Accompagnateur from "./components/Menu/Accompagnateur";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
       <Router>
         <Navbar />
         <Routes>
+          <Route path="/acc" element={<Accompagnateur />} />
           <Route path="/" element={<Home />} />
           <Route path="/itinerary" element={<Itinerary />} />
           <Route path="/login" element={<Login />} />
