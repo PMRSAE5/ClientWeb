@@ -10,7 +10,7 @@ const Navbars = () => {
   return (
     <div className="relative">
       <div className="flex ">
-        <div className="text-sm font-bold color-blues-2 ml-[76%] mt-2">
+        <div className="font-raleway text-sm font-bold color-blues-2 ml-[76%] mt-2">
           <Link to="/login" className="hover:underline mr-2">
             Login
           </Link>
@@ -39,34 +39,34 @@ const Navbars = () => {
               id="navbarScroll"
               className="flex items-center justify-between w-full"
             >
-              <Nav className="flex items-center lg:space-x-12 xl:space-x-20">
+              <Nav className=" flex items-center lg:space-x-12 xl:space-x-20 3xl:space-x-36 ">
                 <Link
                   to=""
-                  className="!font-bold text-white !text-xl hover:text-gray-400 nav-link"
+                  className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Home
                 </Link>
                 <Link
                   to="/itinerary"
-                  className="!font-bold text-white !text-xl hover:text-gray-400 nav-link"
+                  className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Itinerary
                 </Link>
                 <Link
                   to="/reservation"
-                  className="!font-bold text-white !text-xl hover:text-gray-400 nav-link"
+                  className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Reservation
                 </Link>
                 <Link
                   to="/contact"
-                  className="!font-bold text-white !text-xl hover:text-gray-400 nav-link"
+                  className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Contact
                 </Link>
                 <Link
                   to="/help"
-                  className="!font-bold text-white !text-xl hover:text-gray-400 nav-link"
+                  className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Help
                 </Link>
