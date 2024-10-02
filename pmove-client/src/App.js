@@ -7,12 +7,19 @@ import Signup from "./components/Menu/Signup";
 import Reservation from "./components/Menu/Reservation";
 import Footer from "./components/Menu/Footer";
 import Navbar from "./components/Menu/Navbars";
+import MobileNavbars from "./components/MobileMenu/NavbarMobile";
 
 const App = () => {
   return (
     <div>
       <Router>
-        <Navbar />
+        <div className="hidden lg:block">
+          <Navbar />
+        </div>
+        <div className="block lg:hidden">
+          <MobileNavbars />
+        </div>
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/itinerary" element={<Itinerary />} />

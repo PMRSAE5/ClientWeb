@@ -15,16 +15,15 @@ const Home = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
-  // Changer d'image après un certain intervalle de temps
   useEffect(() => {
     const interval = setInterval(() => {
       setDirection(1);
       setCurrentImageIndex((prevIndex) =>
         prevIndex === images.length - 1 ? 0 : prevIndex + 1
       );
-    }, 5000); // Changer d'image toutes les 3 secondes
+    }, 5000);
 
-    return () => clearInterval(interval); // Nettoyer l'intervalle lorsque le composant est démonté
+    return () => clearInterval(interval);
   }, [images.length]);
 
   return (
@@ -42,8 +41,10 @@ const Home = () => {
           className="absolute mt-8 w-full object-cover object-[center_70%] h-[600px]"
         />
       </AnimatePresence>
-      <div className="absolute top-56 3xl:top-44 right-8 3xl:right-28 text-white text-left flex flex-col items-start">
-        <h1 className="font-raleway text-[100px] font-bold mb-4 ">Need us ?</h1>
+      <div className="absolute top-60 lg:top-56 3xl:top-44 lg:right-8 right-10 3xl:right-28 text-white text-left flex flex-col lg:items-start items-center">
+        <h1 className="font-raleway lg:text-[100px] text-[70px] font-bold mb-4 ">
+          Need us ?
+        </h1>
         <motion.div
           whileHover={{ scale: 1.1 }}
           onHoverStart={(e) => {}}
@@ -61,7 +62,7 @@ const Home = () => {
       <motion.div
         className="mt-160 " // Position initiale de votre section
         whileInView={{
-          x: 100, // Déplace l'élément de 100 pixels vers la droite lorsqu'il entre dans la vue
+          x: window.innerWidth >= 1024 ? 100 : 5, // Déplace l'élément de 100 pixels vers la droite lorsqu'il entre dans la vue
           y: 0, // Pas de déplacement vertical
           scale: 1, // Taille normale de l'élément
           rotate: 0, // Pas de rotation
@@ -71,14 +72,16 @@ const Home = () => {
         transition={{ duration: 1.5 }} // Durée de l'animation (1.5 secondes)
         viewport={{ once: true, amount: 0.5 }} // Active l'animation lorsque 50% de l'élément est visible
       >
-        <h1 className="font-raleway text-blue text-[75px]">Welcome Back!</h1>
-        <p className="font-raleway font-semibold text-lg ml-2">
+        <h1 className="font-raleway ml-2 text-blue lg:text-[75px] text-[43px] ">
+          Welcome Back!
+        </h1>
+        <p className="font-raleway font-semibold lg:text-lg text-md ml-2">
           PMove supports you in all your travels across France and beyond!
         </p>
       </motion.div>
 
       <motion.div
-        className="flex justify-around mt-20"
+        className="flex flex-col lg:flex-row lg:justify-around mt-20"
         variants={container}
         initial="hidden"
         whileInView="visible"
@@ -96,15 +99,15 @@ const Home = () => {
               transition: { duration: 1 },
             }}
             whileTap={{
-              scale: 1.5,
-              rotate: -90,
-              borderRadius: "100%",
+              scale: 1.2,
+              rotate: 360,
+              transition: { duration: 3 },
             }}
           />
           <h3 className="font-raleway font-extrabold text-blue text-xl font-bold mt-4">
             Taxi
           </h3>
-          <p className="font-raleway font-bold text-gray-600 mt-8 w-64">
+          <p className="mx-auto font-raleway font-bold text-gray-600 mt-8 w-64">
             Our taxi service is available 24/7 to meet all your transportation
             needs, whether for a short ride or a long journey. Our professional
             drivers ensure a comfortable and safe trip.
@@ -112,7 +115,7 @@ const Home = () => {
         </motion.div>
 
         {/* Section Public Transport */}
-        <motion.div className="text-center" variants={item}>
+        <motion.div className="text-center mt-12 lg:mt-1" variants={item}>
           <motion.img
             src={Bus}
             alt="Bus Icon"
@@ -124,14 +127,14 @@ const Home = () => {
             }}
             whileTap={{
               scale: 0.8,
-              rotate: -90,
-              borderRadius: "100%",
+              rotate: 360,
+              transition: { duration: 3 },
             }}
           />
           <h3 className="font-raleway font-extrabold text-blue text-xl font-bold mt-4">
             Public Transport
           </h3>
-          <p className="font-raleway font-bold text-gray-600 mt-8 w-64">
+          <p className="mx-auto font-raleway font-bold text-gray-600 mt-8 w-64">
             With our public transport service, you can travel all around the
             city effortlessly. Our buses and trains are modern, comfortable, and
             punctual, ensuring you reach your destination on time.
@@ -139,7 +142,7 @@ const Home = () => {
         </motion.div>
 
         {/* Section Airplane */}
-        <motion.div className="text-center" variants={item}>
+        <motion.div className="text-center mt-12 lg:mt-1" variants={item}>
           <motion.img
             src={Avion}
             alt="Avion Icon"
@@ -150,15 +153,15 @@ const Home = () => {
               transition: { duration: 1 },
             }}
             whileTap={{
-              scale: 0.8,
-              rotate: -90,
-              borderRadius: "100%",
+              scale: 1.2,
+              rotate: 360,
+              transition: { duration: 3 },
             }}
           />
           <h3 className="font-raleway font-extrabold text-blue text-xl font-bold mt-4">
             Airplane
           </h3>
-          <p className="font-raleway font-bold text-gray-600 mt-8 w-64">
+          <p className="mx-auto font-raleway font-bold text-gray-600 mt-8 w-64">
             Our airplane travel services offer hassle-free journeys with regular
             flights and competitive rates. Enjoy a pleasant flying experience
             with spacious seating and quality services.
@@ -167,13 +170,13 @@ const Home = () => {
       </motion.div>
 
       <div>
-        <h1 className="font-raleway text-blue text-[45px] mt-32 ml-12 ">
+        <h1 className="font-raleway text-blue lg:text-[45px] text-[25px] mt-32 lg:ml-12 ml-4 ">
           You had no idea which path to take?
         </h1>
         <img
           src={Image}
           alt="Description de l'image"
-          className="ml-12 mt-12 w-11/12"
+          className="ml-4 lg:ml-12 mt-6 lg:mt-12 w-11/12"
         />
       </div>
 
@@ -187,7 +190,7 @@ const Home = () => {
         <motion.img
           src={BackHome2}
           alt="Brainstorming_image"
-          className="mt-24 -ml-20 w-1/2 h-auto"
+          className="absolute opacity-75 mt-72 w-full lg:opacity-100 lg:relative lg:mt-24 lg:-ml-20 lg:w-1/2 lg:h-auto"
           variants={item}
           whileHover={{ scale: 1.2 }}
           transition={{ duration: 1 }}
@@ -199,17 +202,17 @@ const Home = () => {
         />
 
         <motion.div
-          className="flex flex-col"
+          className="flex flex-col items-center"
           variants={item}
           whileHover={{ scale: 1.2 }}
           transition={{ duration: 1 }}
         >
-          <h2 className="text-[75px] mt-24 font-raleway font-semibold text-blue">
+          <h2 className="text-center text-[75px] mt-24 font-raleway font-semibold text-blue">
             Our solution
           </h2>
 
-          <div className="flex justify-start items-start">
-            <p className="mt-8 text-[23px] max-w-[450px] leading-relaxed font-raleway items-start text-gray-600">
+          <div className="flex justify-center items-center">
+            <p className="mt-8 text-[23px] max-w-[450px] leading-relaxed font-raleway text-gray-600 text-center">
               Our solution is designed to make your travels simpler and your
               journeys more enjoyable. Whether you are traveling for work or
               leisure, we offer a range of services tailored to your needs. With
