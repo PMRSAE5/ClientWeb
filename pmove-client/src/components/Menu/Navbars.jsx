@@ -41,7 +41,7 @@ const Navbars = () => {
             >
               <Nav className=" flex items-center lg:space-x-12 xl:space-x-20 3xl:space-x-36 ">
                 <Link
-                  to=""
+                  to="/"
                   className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Home
