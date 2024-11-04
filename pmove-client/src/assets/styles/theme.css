@@ -18,4 +18,7 @@
   .text-blue {
     color: #5489ce;
   }
+  .font-raleway {
+    font-family: "Raleway", sans-serif;
+  }
 }
