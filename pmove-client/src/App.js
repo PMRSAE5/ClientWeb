@@ -11,6 +11,7 @@ import Navbar from "./components/Menu/Navbars";
 import ReservationTrajet from "./components/Menu/ReservationTrajet";
 import MobileNavbars from "./components/MobileMenu/NavbarMobile";
 import Accompagnateur from "./components/Menu/Accompagnateur";
+import Help from "./components/Menu/Help";
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/reservation" element={<Reservation />} />
+          <Route path="/help" element={<Help />} />
         </Routes>
         <Footer />
       </Router>

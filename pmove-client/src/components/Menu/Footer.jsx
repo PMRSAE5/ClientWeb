@@ -2,7 +2,7 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#5489CE] text-white py-6">
+    <footer className="bg-[#5489CE] text-white py-6 ">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
         {/* Section gauche : Logo et nom */}
         <div className="mb-4 md:mb-0">
@@ -13,7 +13,7 @@ const Footer = () => {
             PMove propose des solutions adaptées pour les PMR telles que des services d'accompagnement pour faciliter leurs déplacements.
           </p>
           <p className="mt-2 text-sm">
-            <br></br>© {new Date().getFullYear()} MonSite PMove. Tous droits réservés.
+            <br></br>© {new Date().getFullYear()} PMove. Tous droits réservés.
           </p>
         </div>
 
@@ -56,7 +56,7 @@ const Footer = () => {
                 <path d="M.694 18.52v-9.498l10.306 7.083 10.306-7.083v9.498h-20.611z" />
               </svg>
               <span className="bg-white text-[#000000] px-2 py-1 rounded-md font-semibold">
-                pmouve@gmail.com
+                pmove@gmail.com
               </span>
             </div>
           </div>
@@ -72,7 +72,7 @@ const Footer = () => {
                 <path d="M24 4.557a9.83 9.83 0 0 1-2.828.775 4.93 4.93 0 0 0 2.165-2.724 9.865 9.865 0 0 1-3.127 1.195 4.916 4.916 0 0 0-8.374 4.482A13.949 13.949 0 0 1 1.671 3.149a4.916 4.916 0 0 0 1.523 6.574 4.903 4.903 0 0 1-2.229-.616v.062a4.919 4.919 0 0 0 3.946 4.827 4.902 4.902 0 0 1-2.224.084 4.923 4.923 0 0 0 4.598 3.417 9.868 9.868 0 0 1-6.102 2.104c-.396 0-.79-.023-1.174-.067A13.953 13.953 0 0 0 7.548 21c9.054 0 14.01-7.504 14.01-14.01 0-.213-.005-.425-.014-.636A10.025 10.025 0 0 0 24 4.557z" />
               </svg>
               <span className="bg-[#000000] text-white px-2 py-1 rounded-md font-semibold">
-                @pmouve2025
+                @pmove2025
               </span>
             </div>
           </div>
