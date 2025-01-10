@@ -12,6 +12,7 @@ import ReservationTrajet from "./components/Menu/ReservationTrajet";
 import MobileNavbars from "./components/MobileMenu/NavbarMobile";
 import Accompagnateur from "./components/Menu/Accompagnateur";
 import Help from "./components/Menu/Help";
+import Contact from "./components/Menu/Contact";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/reservation" element={<Reservation />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/help" element={<Help />} />
         </Routes>
         <Footer />
