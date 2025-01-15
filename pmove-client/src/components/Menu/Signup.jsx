@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { FaGoogle, FaFacebook, FaTwitter } from "react-icons/fa";
+import Logo from "../../images/logo/PMoveLogoAvecStyle.png";
+import BackSignUp from "../../images/BackSingup.jpg";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -46,110 +48,130 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen ">
-      <form onSubmit={handleSubmit} className="bg-white p-8  max-w-3xl w-full">
-        <h2 className="text-2xl font-bold mb-4 text-center">S'inscrire</h2>
+    <div className="flex flex-col items-center mr-12 justify-center mt-28  ">
+      <img
+        src={Logo}
+        alt="Logo"
+        className="absolute z-10 mr-100 3xl:-top-40 xl:top-24 w-3/12 mt-2 hidden lg:block"
+      />
+
+      <form
+        onSubmit={handleSubmit}
+        className="xl:p-8 max-w-3xl w-full mt-28 xl:-ml-32 ml-12 "
+      >
+        <h2 className="relative xl:ml-0 ml-12 z-10 mb-16 font-raleway font-bold text-[60px] text-2xl font-bold ">
+          S'inscrire
+        </h2>
 
         {/* Civilité */}
         <div className="mb-4">
-          <h4 className="font-semibold mb-2">Civilité</h4>
-          <div className="flex space-x-4">
-            <label className="flex items-center">
+          <h4 className="relative font-raleway text-xl block font-raleway text-left font-bold mb-1 z-10">
+            Civilité
+          </h4>
+          <div className="flex space-x-4 mt-8">
+            <label className="flex relative z-10 items-center">
               <input
                 type="radio"
                 name="civilite"
                 value="1"
                 onChange={handleChange}
               />
-              <span className="ml-2">Mr</span>
+              <span className="relative z-10 font-raleway ml-2">Mr</span>
             </label>
-            <label className="flex items-center">
+            <label className="flex relative z-10 items-center">
               <input
                 type="radio"
                 name="civilite"
                 value="2"
                 onChange={handleChange}
               />
-              <span className="ml-2">Mme</span>
+              <span className="font-raleway ml-2">Mme</span>
             </label>
-            <label className="flex items-center">
+            <label className="flex relative z-10 items-center">
               <input
                 type="radio"
                 name="civilite"
                 value="3"
                 onChange={handleChange}
               />
-              <span className="ml-2">Autre</span>
+              <span className="font-raleway ml-2">Autre</span>
             </label>
           </div>
         </div>
 
         {/* Nom et Prénom */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <h4 className="font-semibold">Nom</h4>
+
+        <div className="xl:grid xl:grid-cols-2 gap-40 xl:mb-4">
+          <div className="flex flex-col">
+            <h4 className="font-raleway text-xl block text-left font-bold mb-1 z-10">
+              Nom
+            </h4>
             <input
               type="text"
               name="name"
-              placeholder="Nom"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black z-10 border border-black"
             />
           </div>
-          <div>
-            <h4 className="font-semibold">Prénom</h4>
+          <div className="flex flex-col">
+            <h4 className="font-raleway text-xl block text-left font-bold mb-1 z-10">
+              Prénom
+            </h4>
             <input
               type="text"
               name="surname"
-              placeholder="Prénom"
               value={formData.surname}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black z-10 border border-black"
             />
           </div>
         </div>
 
         {/* Email et Téléphone */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="xl:grid xl:grid-cols-2 gap-40 xl:mb-4">
           <div>
-            <h4 className="font-semibold">Adresse e-mail</h4>
+            <h4 className="font-raleway relative z-10 text-xl block font-raleway text-left font-bold mb-1 ">
+              Adresse e-mail
+            </h4>
             <input
               type="email"
               name="mail"
-              placeholder="Email"
               value={formData.mail}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black"
             />
           </div>
           <div>
-            <h4 className="font-semibold">Téléphone</h4>
+            <h4 className=" relative z-10 font-raleway text-xl block font-raleway text-left font-bold mb-1 ">
+              Téléphone
+            </h4>
             <input
               type="number"
               name="num"
-              placeholder="Téléphone"
               value={formData.num}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black"
             />
           </div>
         </div>
 
         {/* Handicap et Date de naissance */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="xl:grid xl:grid-cols-2 gap-40 xl:mb-4">
           <div>
-            <h4 className="font-semibold">Handicap</h4>
+            <h4 className="relative font-raleway text-xl block font-raleway text-left font-bold mb-1 z-10">
+              Handicap
+            </h4>
             <select
               name="handicap"
               value={formData.handicap}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black "
             >
               <option value="">Sélectionner un handicap</option>
               <option value="1">Fauteuil</option>
@@ -158,82 +180,87 @@ const Signup = () => {
             </select>
           </div>
           <div>
-            <h4 className="font-semibold">Date anniversaire</h4>
+            <h4 className="relative z-10 font-raleway text-xl block font-raleway text-left font-bold mb-1">
+              Date anniversaire
+            </h4>
             <input
               type="date"
               name="birth"
               value={formData.birth}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black"
             />
           </div>
         </div>
 
         {/* Contact Mail et Contact Num */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="xl:grid xl:grid-cols-2 gap-40 xl:mb-4">
           <div>
-            <h4 className="font-semibold">Contact Mail</h4>
+            <h4 className="relative z-10 font-raleway text-xl block font-raleway text-left font-bold mb-1">
+              Contact Mail
+            </h4>
             <input
               type="email"
               name="contact_mail"
-              placeholder="Contact Email"
               value={formData.contact_mail}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black"
             />
           </div>
           <div>
-            <h4 className="font-semibold">Contact Num</h4>
+            <h4 className="relative z-10 font-raleway text-xl block font-raleway text-left font-bold mb-1">
+              Contact Num
+            </h4>
             <input
               type="number"
               name="contact_num"
-              placeholder="Contact Num"
               value={formData.contact_num}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black"
             />
           </div>
         </div>
 
-        {/* Mot de passe et Note */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="xl:grid xl:grid-cols-2 gap-40 mb-4">
           <div>
-            <h4 className="font-semibold">Mot de passe</h4>
+            <h4 className="relative z-10 font-raleway text-xl block font-raleway text-left font-bold mb-1 ">
+              Mot de passe
+            </h4>
             <input
               type="password"
               name="password"
-              placeholder="Mot de passe"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black"
             />
           </div>
           <div>
-            <h4 className="font-semibold">Note</h4>
+            <h4 className="relative z-10 font-raleway text-xl block font-raleway text-left font-bold mb-1 ">
+              Note
+            </h4>
             <textarea
               name="note"
-              placeholder="Note"
               value={formData.note}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black z-10 border border-black"
             ></textarea>
           </div>
         </div>
 
         {/* Conditions générales */}
-        <div className="flex items-center mb-4">
+        <div className="flex leading-loose items-center font-raleway  mb-4">
           <input type="checkbox" className="mr-2" required />
           <span>
-            J'ai lu et j'accepte les{" "}
-            <a href="/#" className="text-blue-500 hover:underline">
+            J'ai lu et j'accepte les
+            <a href="/#" className="ml-1 mr-1 text-blue-500 hover:underline">
               Conditions générales
-            </a>{" "}
-            et la{" "}
-            <a href="/#" className="text-blue-500 hover:underline">
+            </a>
+            et la
+            <a href="/#" className="ml-1 mr-1 text-blue-500 hover:underline">
               Politique de confidentialité
             </a>
             .
@@ -243,20 +270,29 @@ const Signup = () => {
         {/* Bouton d'inscription */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
+          className="relative z-10 xl:w-[815px] w-[375px] font-raleway font-bold color-blues-3 text-white p-3 rounded-lg  transition"
         >
           S'inscrire
         </button>
       </form>
+      <div className="absolute">
+        <img
+          src={BackSignUp}
+          alt="fond"
+          className="xl:max-w-[1150px] xl:ml-28 -ml-20 xl:-mt-[380px] -mt-[460px] max-w-[500px] opacity-100 z-0 "
+        />
+      </div>
 
-      <div className="flex items-center mt-4 lg:mt-24 mb-8">
+      <div className="flex items-center xl:ml-0 ml-12 mt-4 lg:mt-24 mb-8">
         <div className="border-t border-gray-300 w-[155px] lg:w-[380px]"></div>
         <span className="px-4 text-gray-500">ou</span>
         <div className="border-t border-gray-300 w-[155px] lg:w-[380px]"></div>
       </div>
 
-      <div className="flex flex-col items-center">
-        <h2 className="text-lg font-raleway mb-6">Connectez-vous avec</h2>
+      <div className="flex flex-col xl:ml-0 ml-12 items-center ">
+        <h2 className="text-lg xl:ml-0 font-raleway mb-6">
+          Connectez-vous avec
+        </h2>
         <button className="flex font-raleway font-bold items-center justify-center w-[375px] lg:w-[830px] border border-black rounded-lg py-2 mb-4 hover:bg-gray-100 ">
           <FaGoogle className="mr-2 text-xl text-red-600" />
           Continuer avec Google
@@ -274,7 +310,7 @@ const Signup = () => {
         <div className="flex justify-center items-center">
           <p className="text-center font-raleway text-md mt-4">
             Vous avez déjà un compte ?
-            <a href="/signup" className="text-blue hover:underline">
+            <a href="/signup" className="ml-1 text-blue hover:underline">
               Se connecter
             </a>
           </p>

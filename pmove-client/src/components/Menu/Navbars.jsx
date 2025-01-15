@@ -1,26 +1,61 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Logo from "../../images/logo/PMoveLogoSANSTITRE.png";
 import Intersect from "../../images/Intersect.svg";
+import { UserContext } from "../../UserContext";
 
 const Navbars = () => {
+  const { user, setUser } = useContext(UserContext); // Utilisation du contexte
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/users/logout", {
+        method: "POST",
+        credentials: "include", // Nécessaire pour inclure les cookies de session
+      });
+
+      if (response.ok) {
+        setUser(null); // Réinitialise l'utilisateur dans le contexte
+      } else {
+        console.error("Erreur lors de la déconnexion.");
+      }
+    } catch (err) {
+      console.error("Erreur lors de la déconnexion :", err);
+    }
+  };
+
   return (
     <div className="relative">
-      <div className="flex ">
+      <div className="flex">
         <div className="font-raleway text-sm font-bold color-blues-2 ml-[76%] mt-2">
-          <Link to="/login" className="hover:underline mr-2">
-            Login
-          </Link>
-          <span className="right-0">|</span>
-          <Link to="/signup" className="right-0 hover:underline ml-2">
-            Sign up
-          </Link>
+          {user ? (
+            <div className="flex items-center">
+              <span className="mr-4">Bienvenue, {user.name}</span>
+              <button
+                onClick={handleLogout}
+                className="hover:underline text-red-600 font-bold"
+              >
+                Déconnexion
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="hover:underline mr-2">
+                Login
+              </Link>
+              <span className="right-0">|</span>
+              <Link to="/signup" className="right-0 hover:underline ml-2">
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
+      {/* Navbar principale */}
       <div className="mt-2 font-raleway color-blues h-24 w-[78%] p-2 relative flex items-center justify-center ">
         <div className="absolute -right-12">
           <img src={Intersect} alt="Intersect" className="mt-22 h-24" />

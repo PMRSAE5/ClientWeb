@@ -7,34 +7,38 @@ import Signup from "./components/Menu/Signup";
 import Reservation from "./components/Menu/Reservation";
 import Footer from "./components/Menu/Footer";
 import Navbar from "./components/Menu/Navbars";
-
+import { UserProvider } from "./UserContext";
 import ReservationTrajet from "./components/Menu/ReservationTrajet";
 import MobileNavbars from "./components/MobileMenu/NavbarMobile";
 import Accompagnateur from "./components/Menu/Accompagnateur";
+import Logout from "./components/Menu/Logout";
 
 const App = () => {
   return (
-    <div>
-      <Router>
-        <div className="hidden lg:block">
-          <Navbar />
-        </div>
-        <div className="block lg:hidden">
-          <MobileNavbars />
-        </div>
+    <UserProvider>
+      <div>
+        <Router>
+          <div className="hidden lg:block">
+            <Navbar />
+          </div>
+          <div className="block lg:hidden">
+            <MobileNavbars />
+          </div>
 
-        <Routes>
-          <Route path="/reservation2" element={<ReservationTrajet />} />
-          <Route path="/acc" element={<Accompagnateur />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/itinerary" element={<Itinerary />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/reservation" element={<Reservation />} />
-        </Routes>
-        <Footer />
-      </Router>
-    </div>
+          <Routes>
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/reservation2" element={<ReservationTrajet />} />
+            <Route path="/acc" element={<Accompagnateur />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/itinerary" element={<Itinerary />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/reservation" element={<Reservation />} />
+          </Routes>
+          <Footer />
+        </Router>
+      </div>
+    </UserProvider>
   );
 };
 
