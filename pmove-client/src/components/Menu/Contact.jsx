@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
   const [email, setEmail] = useState("");
@@ -7,59 +9,68 @@ const Contact = () => {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const submit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Show loader during submission
-    setError(""); // Reset errors
+    setLoading(true);
 
     try {
       const res = await axios.post(
-        "./Contact.jsx",
+        "http://localhost:5000/send-email",
         { email, name, subject, message },
-        { headers: { Accept: "application/json" } }
+        { headers: { "Content-Type": "application/json" } }
       );
-
+  
       if (res.data.code === 200) {
+        toast.success("Your message has been successfully sent !");
         setSubmitted(true);
       } else {
-        setError(res.data.message || "An error occurred. Please try again.");
+        toast.error("An error occurred. Please try again.");
       }
     } catch (err) {
-      setError("There was an error submitting the form. Please try again.");
+      toast.error("Network error while sending the message. Please try again.");
     } finally {
-      setLoading(false); // Hide loader after response
+      setLoading(false);
     }
   };
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-white-100">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Thank you for your message!
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-100">
+        <div className="max-w-lg p-8 text-center bg-white rounded-lg shadow-xl">
+          <h2 className="mb-4 text-4xl font-extrabold text-blue-700">
+          Thank you for your message ! 🎉
           </h2>
-          <p className="text-gray-700 mt-2">We will get back to you shortly.</p>
+          <p className="mb-8 text-lg text-gray-700">
+            We will get back to you shortly.
+          </p>
+          <button
+            onClick={() => navigate("/")}
+            className="px-6 py-3 text-white transition bg-blue-700 rounded-lg shadow hover:bg-blue-600"
+          >
+            Back Home
+          </button>
         </div>
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white-100 flex flex-col justify-center items-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white-100">
+      <div className="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="mb-6 text-3xl font-bold text-center text-gray-800">
           PMove Contact Page
         </h1>
         <form onSubmit={submit} className="space-y-6">
           {/* Name and Email Fields */}
-          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
             <div className="w-full">
               <label
                 htmlFor="name"
-                className="block text-gray-700 font-medium mb-2"
+                className="block mb-2 font-medium text-gray-700"
               >
                 Name
               </label>
@@ -76,7 +87,7 @@ const Contact = () => {
             <div className="w-full">
               <label
                 htmlFor="email"
-                className="block text-gray-700 font-medium mb-2"
+                className="block mb-2 font-medium text-gray-700"
               >
                 Email Address
               </label>
@@ -96,7 +107,7 @@ const Contact = () => {
           <div>
             <label
               htmlFor="subject"
-              className="block text-gray-700 font-medium mb-2"
+              className="block mb-2 font-medium text-gray-700"
             >
               Subject
             </label>
@@ -115,7 +126,7 @@ const Contact = () => {
           <div>
             <label
               htmlFor="message"
-              className="block text-gray-700 font-medium mb-2"
+              className="block mb-2 font-medium text-gray-700"
             >
               Message
             </label>
@@ -134,13 +145,13 @@ const Contact = () => {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition flex items-center"
+              className="flex items-center px-6 py-3 text-white transition bg-blue-700 rounded-lg hover:bg-blue-600"
               disabled={loading}
             >
               {loading ? (
                 <>
                   <svg
-                    className="animate-spin h-5 w-5 text-white mr-2"
+                    className="w-5 h-5 mr-2 text-white animate-spin"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -167,13 +178,7 @@ const Contact = () => {
             </button>
           </div>
         </form>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mt-6 bg-red-100 text-red-600 p-4 rounded-lg">
-            <p>{error}</p>
-          </div>
-        )}
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </div>
     </div>
   );
