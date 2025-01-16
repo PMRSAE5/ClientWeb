@@ -4,6 +4,7 @@ import BackLogin from "../../images/BackLogin.png";
 import { FaGoogle, FaFacebook, FaTwitter } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserContext";
+import { login } from "../../api/api"; // Import de la fonction login depuis api.js
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,34 +23,28 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/users/userLog", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Nécessaire pour inclure les cookies de session
-        body: JSON.stringify({ mail: email, password }),
-      });
+      // Appel à la fonction `login` depuis api.js
+      const data = await login(email, password);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data && data.user) {
         setSuccessMessage(`Bienvenue, ${data.user.name || "Utilisateur"} !`);
         setError("");
         setUser(data.user); // Met à jour l'utilisateur dans le contexte
         navigate("/"); // Redirection après connexion
       } else {
-        setError(data.error || "Erreur inconnue.");
-        setSuccessMessage("");
+        setError(
+          "Erreur lors de la connexion. Veuillez vérifier vos identifiants."
+        );
       }
     } catch (err) {
       console.error("Erreur lors de la connexion :", err);
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      setError(err.message || "Une erreur est survenue. Veuillez réessayer.");
       setSuccessMessage("");
     }
   };
+
   return (
-    <div className="flex items-center justify-center ">
+    <div className="flex items-center justify-center">
       <img
         src={Logo}
         alt="Logo"
@@ -58,7 +53,7 @@ const Login = () => {
 
       <div className="flex items-center justify-center min-h-screen mt-28">
         <div className="relative flex flex-col xl:items-start items-center p-20 mt-48">
-          <h1 className="-mt-40 font-raleway font-bold text-[60px] items-start text-2xl font-bold z-10 ">
+          <h1 className="-mt-40 font-raleway font-bold text-[60px] items-start text-2xl font-bold z-10">
             Connexion
           </h1>
 

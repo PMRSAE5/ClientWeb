@@ -1,29 +1,26 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Logo from "../../images/logo/PMoveLogoSANSTITRE.png";
 import Intersect from "../../images/Intersect.svg";
 import { UserContext } from "../../UserContext";
+import { logout } from "../../api/api";
 
 const Navbars = () => {
+  const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext); // Utilisation du contexte
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:3000/users/logout", {
-        method: "POST",
-        credentials: "include", // Nécessaire pour inclure les cookies de session
-      });
-
-      if (response.ok) {
-        setUser(null); // Réinitialise l'utilisateur dans le contexte
-      } else {
-        console.error("Erreur lors de la déconnexion.");
-      }
+      await logout();
+      setUser(null); // Réinitialisation du contexte utilisateur
+      alert("Déconnexion réussie !");
+      navigate("/login"); // Redirection vers la page de connexion
     } catch (err) {
-      console.error("Erreur lors de la déconnexion :", err);
+      console.error(err);
+      alert("Erreur lors de la déconnexion.");
     }
   };
 
@@ -33,7 +30,12 @@ const Navbars = () => {
         <div className="font-raleway text-sm font-bold color-blues-2 ml-[76%] mt-2">
           {user ? (
             <div className="flex items-center">
-              <span className="mr-4">Bienvenue, {user.name}</span>
+              <Link
+                to="/profile"
+                className="mr-4 hover:underline color-blues-2 font-bold"
+              >
+                Bienvenue, {user.name}
+              </Link>
               <button
                 onClick={handleLogout}
                 className="hover:underline text-red-600 font-bold"
@@ -88,7 +90,7 @@ const Navbars = () => {
                   Itinerary
                 </Link>
                 <Link
-                  to="/reservation"
+                  to="/prereservation"
                   className="font-raleway !font-semibold text-white !text-xl hover:text-gray-400 nav-link"
                 >
                   Reservation
