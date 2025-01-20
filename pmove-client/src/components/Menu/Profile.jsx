@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { updateUserProfile } from "../../api/api";
 
 const Profile = () => {
-  const [profilePic, setProfilePic] = useState(null);
   const [personalInfo, setPersonalInfo] = useState({
     ID_Client: "", // Ajoutez l'ID_Client pour l'identification
     civilite: "",

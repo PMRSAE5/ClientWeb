@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import Bus from "../../images/Bus.svg";
 import Avion from "../../images/Avion.svg";
 import Taxi from "../../images/Taxi.svg";
-import Image from "../../images/remplacement.jpg";
 import BackHome2 from "../../images/BackHome2.png";
 import { motion, AnimatePresence } from "framer-motion";
 
