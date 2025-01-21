@@ -174,9 +174,13 @@ const Signup = () => {
               className="relative z-10 w-[375px] p-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-black border border-black "
             >
               <option value="">Sélectionner un handicap</option>
-              <option value="1">Fauteuil</option>
-              <option value="2">Aveugle</option>
-              <option value="3">Âgé</option>
+              <option value="1">BLND : Malvoyant ou non voyant</option>
+              <option value="2">DEAF : Malentendant ou sourd</option>
+              <option value="3">DPNA : Déficience Intellectuelle ou comportementale</option>
+              <option value="4">WCHR :Besoin de fauteuil roulant pour les déplacements</option>
+              <option value="5">WCHS : Besoin d'aide pour tout déplacement</option>
+              <option value="6">WCHC : Assistance complète nécessaire</option>
+              <option value="7">MAAS : Assistance spécifique</option>
             </select>
           </div>
           <div>
@@ -251,7 +255,7 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Conditions générales */}
+        {/* Conditions générales 
         <div className="flex leading-loose items-center font-raleway  mb-4">
           <input type="checkbox" className="mr-2" required />
           <span>
@@ -265,7 +269,7 @@ const Signup = () => {
             </a>
             .
           </span>
-        </div>
+        </div>*/}
 
         {/* Bouton d'inscription */}
         <button

@@ -16,16 +16,18 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       setError("Veuillez remplir tous les champs.");
       return;
     }
-
+  
     try {
+      console.log("Tentative de connexion avec :", { email, password });
       // Appel à la fonction `login` depuis api.js
       const data = await login(email, password);
-
+      console.log("Réponse reçue de l'API :", data);
+  
       if (data && data.user) {
         setSuccessMessage(`Bienvenue, ${data.user.name || "Utilisateur"} !`);
         setError("");
@@ -46,7 +48,7 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center">
       <img
-        src={Logo}
+        src={Logo} 
         alt="Logo"
         className="absolute mr-100 3xl:-top-40 xl:top-24 w-3/12 mt-2 hidden lg:block"
       />
