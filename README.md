@@ -1,18 +1,37 @@
 # PMRSAE5
+## Prérequis
 
-Outils nécessaire : 
-Node.js >= 18.0.0 
+Avant de commencer, assurez-vous d'avoir les outils suivants installés :
+Node.js : Version 18.0.0 ou supérieure.
 
-Oubliez pas d'être dans le parchemin : 
-cd pmove-client 
+## Mise en marche
 
-Lancement de l'application : 
-npm start 
+1. Naviguer dans le répertoire du projet
+```bash
+cd pmove-client
+```
 
-En cas de problème liées a react-scripts : 
+2. Installer les dépendances
+```bash
+npm install
+```
+
+3. Lancer l'application
+```bash
+npm start
+```
+
+## Résolution des problèmes courants
+Problèmes liés à react-scripts :
+Si vous rencontrez une erreur concernant react-scripts, réinstallez-le avec la commande suivante :
+
+```bash
 npm install react-scripts
+```
 
-Les bibliothèques utilisés : 
-React Router,
-Tailwind CSS, 
-React Bootstrapp
+## Bibliothèques utilisées
+Voici une liste des principales bibliothèques et outils dans ce projet :
+- React Router : Pour la gestion de la navigation et des routes.
+- Tailwind CSS : Pour le design et le style rapide.
+- React Bootstrap : Pour des composants d'interface utilisateur prêts à l'emploi.
+
