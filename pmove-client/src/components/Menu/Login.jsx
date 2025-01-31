@@ -1,10 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Logo from "../../images/logo/PMoveLogoAvecStyle.png";
 import BackLogin from "../../images/BackLogin.png";
 import { FaGoogle, FaFacebook, FaTwitter } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../UserContext";
-import { login } from "../../api/api"; // Import de la fonction login depuis api.js
+import { login, validateToken } from "../../api/api"; // Import de la fonction login et validateToken depuis api.js
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +13,25 @@ const Login = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const { user, setUser } = useContext(UserContext); // Utilisation du contexte
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   // Vérifier si token présent
+  //   const token = localStorage.getItem("token");
+  //   if (token) {
+  //     // Demander a l'api de valider le token
+  //     validateToken(token)
+  //       .then((data) => {
+  //         if (data && data.user) {
+  //           setUser(data.user);
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.error("Erreur lors de la validation du token :", err);
+  //         localStorage.removeItem("token");
+  //         localStorage.removeItem("user");
+  //       });
+  //   }
+  // }, [setUser]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,6 +51,8 @@ const Login = () => {
         setSuccessMessage(`Bienvenue, ${data.user.name || "Utilisateur"} !`);
         setError("");
         setUser(data.user); // Met à jour l'utilisateur dans le contexte
+        localStorage.setItem("token", data.token); // Stocker le token dans le localStorage
+        localStorage.setItem("user", JSON.stringify(data.user)); // Stocker les informations de l'utilisateur dans le localStorage
         navigate("/"); // Redirection après connexion
       } else {
         setError(
