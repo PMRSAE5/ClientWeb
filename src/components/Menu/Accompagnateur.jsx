@@ -1,7 +1,13 @@
 import React, {useState} from "react";
 
+///////////////
+///COMPONENT///
+///////////////
 
+// Composant Accompagnateur
 const Accompagnateur = () => {
+
+    // Donnée du formulaire
     const [formData, setFormData] = useState({
         name_acc: '',
         surname_acc: '',
@@ -9,6 +15,7 @@ const Accompagnateur = () => {
         mail_acc: ''
     });
 
+    // Mettre a jour les données du formulaire lors de la saisie
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -17,6 +24,7 @@ const Accompagnateur = () => {
         });
     };
 
+    // Fonction pour gérer l'envoie du formulaire
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -39,6 +47,9 @@ const Accompagnateur = () => {
     };
 
 
+    ////////////
+    ///STYLE////
+    ////////////
     const formStyle = {
         maxWidth: '600px',
         margin: '0 auto',

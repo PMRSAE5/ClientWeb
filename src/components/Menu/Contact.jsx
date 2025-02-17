@@ -4,6 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
+  // Gérer les champs du formulaire
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
@@ -12,6 +13,7 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Pour envoyer le formulaire
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
