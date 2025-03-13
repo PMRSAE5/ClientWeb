@@ -1,296 +1,408 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Map, Marker, NavigationControl, FullscreenControl, Source, Layer } from 'react-map-gl';
-import Supercluster from 'supercluster';
 import Fuse from 'fuse.js';
 import { lineString } from '@turf/turf';
 import mapboxClient from '@mapbox/mapbox-sdk/services/directions';
+import mapboxGeocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import "mapbox-gl/dist/mapbox-gl.css";
 import sncfData from './data/SNCF.json';
 import ratpData from './data/RATP.json';
 
-
 const directionsClient = mapboxClient({ 
-  accessToken: process.env.REACT_APP_MAPBOX_TOKEN || 'pk.eyJ1IjoidHJpYnVubmV4dXMiLCJhIjoiY200OG10bGk1MDFmcjJscjZwczV5MXByOSJ9.QjjFUOHEaNEUw2SfQjCGZw' 
+  accessToken: process.env.REACT_APP_MAPBOX_TOKEN || 'pk.eyJ1IjoidHJpYnVubmV4dXMiLCJhIjoiY200OG10bGk1MDFmcjJscjZwczV5MXByOSJ9.QjjFUOHEaNEUw2SfQjCGZw'
 });
 
-// Configuration du clustering
-const CLUSTER_RADIUS = 80;
-const MAX_ZOOM = 18;
-const INITIAL_ZOOM = 5.5;
+const geocodingClient = mapboxGeocoding({ 
+  accessToken: process.env.REACT_APP_MAPBOX_TOKEN || 'pk.eyJ1IjoidHJpYnVubmV4dXMiLCJhIjoiY200OG10bGk1MDFmcjJscjZwczV5MXByOSJ9.QjjFUOHEaNEUw2SfQjCGZw'
+});
 
-// Configuration de la recherche floue
 const fuseOptions = {
   keys: ['nom', 'stop_name'],
   threshold: 0.3,
   distance: 100
 };
 
+const calculateDistance = (point1, point2) => {
+  const R = 6371e3;
+  const φ1 = point1.lat * Math.PI / 180;
+  const φ2 = point2.lat * Math.PI / 180;
+  const Δφ = (point2.lat - point1.lat) * Math.PI / 180;
+  const Δλ = (point2.lon - point1.lon) * Math.PI / 180;
+
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+};
+
+const findNearestStation = (point, stations, maxDistance = 1000) => {
+  const validStations = stations
+    .map(station => {
+      const coords = station.type === 'SNCF' 
+        ? station.position_geographique 
+        : station.stop_point_geopoint;
+      
+      if (!coords || typeof coords.lat !== 'number' || typeof coords.lon !== 'number') return null;
+
+      return {
+        ...station,
+        distance: calculateDistance(
+          { lat: point.lat, lon: point.lon },
+          { lat: coords.lat, lon: coords.lon }
+        )
+      };
+    })
+    .filter(Boolean)
+    .filter(station => station.distance < maxDistance)
+    .sort((a, b) => a.distance - b.distance);
+
+  return validStations[0] || null;
+};
+
 export default function Itinerary() {
   const [viewport, setViewport] = useState({
-    latitude: 46.6031,
-    longitude: 1.8883,
-    zoom: INITIAL_ZOOM,
+    latitude: 48.8566,
+    longitude: 2.3522,
+    zoom: 12,
   });
-  const [clusters, setClusters] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedStation, setSelectedStation] = useState(null);
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
   const [routeData, setRouteData] = useState(null);
   const [routeSteps, setRouteSteps] = useState([]);
   const [isRouting, setIsRouting] = useState(false);
+  const [transportMode, setTransportMode] = useState('public');
+  const [activeInput, setActiveInput] = useState(null);
 
-  // Combinaison des données
   const combinedData = useMemo(() => {
-    const sncf = sncfData.map(station => ({ ...station, type: 'SNCF' }));
-    const ratp = ratpData.map(station => ({ ...station, type: 'RATP' }));
+    const sncf = sncfData
+      .filter(station => 
+        station.position_geographique &&
+        typeof station.position_geographique.lat === 'number' &&
+        typeof station.position_geographique.lon === 'number'
+      )
+      .map(station => ({ ...station, type: 'SNCF' }));
+    
+    const ratp = ratpData
+      .filter(station => 
+        station.stop_point_geopoint &&
+        typeof station.stop_point_geopoint.lat === 'number' &&
+        typeof station.stop_point_geopoint.lon === 'number'
+      )
+      .map(station => ({ ...station, type: 'RATP' }));
+    
     return [...sncf, ...ratp];
   }, []);
 
-  // Préparation des points pour Supercluster
-  const points = useMemo(() => {
-    return combinedData
-      .filter(station => 
-        (station.type === 'SNCF' && station.position_geographique) ||
-        (station.type === 'RATP' && station.stop_point_geopoint)
-      )
-      .map(station => ({
-        type: 'Feature',
-        properties: {
-          id: station.type === 'SNCF' ? station.codes_uic : station.stop_point_id,
-          name: station.type === 'SNCF' ? station.nom : station.stop_name,
-          type: station.type,
-          original: station
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: station.type === 'SNCF' 
-            ? [station.position_geographique.lon, station.position_geographique.lat]
-            : [station.stop_point_geopoint.lon, station.stop_point_geopoint.lat]
-        }
-      }));
-  }, [combinedData]);
-
-  // Initialisation du cluster
-  const supercluster = useMemo(() => {
-    const sc = new Supercluster({
-      radius: CLUSTER_RADIUS,
-      maxZoom: MAX_ZOOM
-    });
-    sc.load(points);
-    return sc;
-  }, [points]);
-
-  // Mise à jour des clusters
-  useEffect(() => {
-    const bbox = [
-      viewport.longitude - (0.5 / viewport.zoom),
-      viewport.latitude - (0.2 / viewport.zoom),
-      viewport.longitude + (0.5 / viewport.zoom),
-      viewport.latitude + (0.2 / viewport.zoom)
-    ];
-    
-    setClusters(supercluster.getClusters(bbox, Math.floor(viewport.zoom)));
-  }, [viewport, supercluster]);
-
-  // Recherche de stations
   const fuse = useMemo(() => new Fuse(combinedData, fuseOptions), [combinedData]);
   
   useEffect(() => {
     if (searchQuery.length > 1) {
-      const results = fuse.search(searchQuery).map(r => r.item);
-      setSearchResults(results);
+      const stationResults = fuse.search(searchQuery).map(r => r.item);
+      
+      geocodingClient.forwardGeocode({
+        query: searchQuery,
+        limit: 5,
+        countries: ['fr'],
+        types: ['address', 'poi', 'place']
+      }).send()
+      .then(response => {
+        if (!response.body?.features) return;
+        const geoResults = response.body.features.map(feature => ({
+          type: 'geocoded',
+          name: feature.place_name,
+          coordinates: feature.center
+        }));
+        setSearchResults([...stationResults, ...geoResults]);
+      })
+      .catch(error => {
+        console.error('Geocoding error:', error);
+        setSearchResults(stationResults);
+      });
     } else {
       setSearchResults([]);
     }
   }, [searchQuery, fuse]);
 
-  // Gestion du clic sur cluster
-  const handleClusterClick = useCallback((cluster) => {
-    const [longitude, latitude] = cluster.geometry.coordinates;
+  const handleResultSelect = useCallback((result) => {
+    let point;
     
-    setViewport({
-      longitude,
-      latitude,
-      zoom: Math.min(viewport.zoom + 2, MAX_ZOOM),
-      transitionDuration: 500
-    });
-  }, [viewport.zoom]);
+    if (result.type === 'SNCF' || result.type === 'RATP') {
+      const coords = result.type === 'SNCF' 
+        ? result.position_geographique 
+        : result.stop_point_geopoint;
+      if (!coords?.lat || !coords?.lon) return;
+      point = { lat: coords.lat, lon: coords.lon, name: result.nom || result.stop_name };
+    } else {
+      if (!result.coordinates?.[0] || !result.coordinates?.[1]) return;
+      point = { lat: result.coordinates[1], lon: result.coordinates[0], name: result.name };
+    }
 
-  // Calcul de l'itinéraire
+    activeInput === 'start' ? setStartPoint(point) : setEndPoint(point);
+    setSearchQuery('');
+    setActiveInput(null);
+  }, [activeInput]);
+
   const calculateRoute = useCallback(async () => {
     if (!startPoint || !endPoint) return;
 
     setIsRouting(true);
-    try {
-      const response = await directionsClient.getDirections({
-        profile: 'driving-traffic',
-        waypoints: [
-          { coordinates: [startPoint.lon, startPoint.lat] },
-          { coordinates: [endPoint.lon, endPoint.lat] }
-        ],
-        geometries: 'geojson',
-        steps: true
-      }).send();
+    setRouteData(null);
+    setRouteSteps([]);
 
-      const route = response.body.routes[0];
-      setRouteData(route.geometry);
-      setRouteSteps(route.legs[0].steps);
+    try {
+      if (transportMode === 'driving') {
+        const response = await directionsClient.getDirections({
+          profile: 'driving',
+          waypoints: [
+            { coordinates: [startPoint.lon, startPoint.lat] },
+            { coordinates: [endPoint.lon, endPoint.lat] }
+          ],
+          geometries: 'geojson',
+          steps: true
+        }).send();
+
+        if (response.body.routes?.[0]) {
+          setRouteData({
+            type: 'FeatureCollection',
+            features: [{
+              ...response.body.routes[0].geometry,
+              properties: { routeType: 'driving' }
+            }]
+          });
+          setRouteSteps(response.body.routes[0].legs[0].steps);
+        }
+      } else {
+        const startStation = findNearestStation(startPoint, combinedData);
+        const endStation = findNearestStation(endPoint, combinedData);
+
+        if (!startStation || !endStation) {
+          throw new Error('Aucune station trouvée dans un rayon de 1km');
+        }
+
+        const getStationCoords = (station) => {
+          if (station.type === 'SNCF') {
+            return station.position_geographique;
+          }
+          return station.stop_point_geopoint;
+        };
+
+        const startCoords = getStationCoords(startStation);
+        const endCoords = getStationCoords(endStation);
+
+        if (!startCoords || !endCoords) {
+          throw new Error('Coordonnées de station invalides');
+        }
+
+        const [walkToStation, walkFromStation] = await Promise.all([
+          directionsClient.getDirections({
+            profile: 'walking',
+            waypoints: [
+              { coordinates: [startPoint.lon, startPoint.lat] },
+              { coordinates: [startCoords.lon, startCoords.lat] }
+            ],
+            geometries: 'geojson',
+            steps: true
+          }).send(),
+          
+          directionsClient.getDirections({
+            profile: 'walking',
+            waypoints: [
+              { coordinates: [endCoords.lon, endCoords.lat] },
+              { coordinates: [endPoint.lon, endPoint.lat] }
+            ],
+            geometries: 'geojson',
+            steps: true
+          }).send()
+        ]);
+
+        if (!walkToStation.body.routes?.[0] || !walkFromStation.body.routes?.[0]) {
+          throw new Error('Impossible de calculer les trajets piétons');
+        }
+
+        const transitRoute = lineString(
+          [[startCoords.lon, startCoords.lat], [endCoords.lon, endCoords.lat]],
+          { properties: { routeType: 'transit' } }
+        );
+
+        setRouteData({
+          type: 'FeatureCollection',
+          features: [
+            { ...walkToStation.body.routes[0].geometry, properties: { routeType: 'walking' } },
+            transitRoute,
+            { ...walkFromStation.body.routes[0].geometry, properties: { routeType: 'walking' } }
+          ]
+        });
+
+        const transitDistance = calculateDistance(
+          { lat: startCoords.lat, lon: startCoords.lon },
+          { lat: endCoords.lat, lon: endCoords.lon }
+        );
+
+        const transitDuration = Math.round(transitDistance / 5000 * 60);
+
+        setRouteSteps([
+          ...walkToStation.body.routes[0].legs[0].steps,
+          {
+            maneuver: {
+              instruction: `Prendre le ${startStation.type} à ${startStation.nom || startStation.stop_name}`,
+              type: 'transit'
+            },
+            duration: transitDuration,
+            distance: transitDistance
+          },
+          ...walkFromStation.body.routes[0].legs[0].steps
+        ]);
+      }
     } catch (error) {
-      console.error('Erreur de calcul d\'itinéraire:', error);
+      console.error('Erreur:', error);
+      setRouteSteps([{ 
+        maneuver: { 
+          instruction: error.message || 'Erreur lors du calcul de l\'itinéraire' 
+        } 
+      }]);
     }
     setIsRouting(false);
-  }, [startPoint, endPoint]);
+  }, [startPoint, endPoint, transportMode, combinedData]);
 
-  // Rendu des marqueurs
-  const renderMarkers = () => {
-    return (
-      <>
-        {clusters.map(cluster => {
-          const { geometry, properties } = cluster;
-          const [longitude, latitude] = geometry.coordinates;
-          const isCluster = properties.cluster;
-          const isSelected = selectedStation?.codes_uic === properties.id || 
-                            selectedStation?.stop_point_id === properties.id;
-          const isRATP = properties.type === 'RATP';
-
-          if (isCluster) {
-            const pointCount = properties.point_count;
-            const size = 30 + Math.log(pointCount) * 5;
-
-            return (
-              <Marker
-                key={`cluster-${cluster.id}`}
-                longitude={longitude}
-                latitude={latitude}
-              >
-                <div
-                  style={{
-                    width: size,
-                    height: size,
-                    background: 'rgba(0, 150, 0, 0.6)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    border: '2px solid #fff',
-                    fontSize: Math.min(14, size/3),
-                    fontWeight: 'bold',
-                    color: 'white'
-                  }}
-                  onClick={() => handleClusterClick(cluster)}
-                >
-                  {pointCount}
-                </div>
-              </Marker>
-            );
-          }
-
-          return (
-            <Marker
-              key={properties.id}
-              longitude={longitude}
-              latitude={latitude}
-            >
-              <div
-                style={{
-                  width: isSelected ? 18 : 12,
-                  height: isSelected ? 18 : 12,
-                  background: isRATP 
-                    ? (isSelected ? '#0000ff' : '#0000aa') 
-                    : (isSelected ? '#ff0000' : '#00ff00'),
-                  borderRadius: '50%',
-                  cursor: 'pointer',
-                  boxShadow: '0 0 5px rgba(0,0,0,0.3)',
-                  transition: 'all 0.3s'
-                }}
-                title={properties.name}
-                onClick={() => setSelectedStation(properties.original)}
-              />
-            </Marker>
-          );
-        })}
-
-        {/* Marqueurs de départ/arrivée */}
-        {startPoint && (
-          <Marker longitude={startPoint.lon} latitude={startPoint.lat}>
-            <div style={{
-              width: 20,
-              height: 20,
-              background: '#4CAF50',
-              borderRadius: '50%',
-              border: '2px solid white'
-            }} />
-          </Marker>
-        )}
-
-        {endPoint && (
-          <Marker longitude={endPoint.lon} latitude={endPoint.lat}>
-            <div style={{
-              width: 20,
-              height: 20,
-              background: '#F44336',
-              borderRadius: '50%',
-              border: '2px solid white'
-            }} />
-          </Marker>
-        )}
-      </>
-    );
-  };
-
-  // Rendu de l'itinéraire
   const renderRoute = () => {
     if (!routeData) return null;
 
     return (
-      <Source id="route" type="geojson" data={lineString(routeData.coordinates)}>
-        <Layer
-          id="route"
-          type="line"
-          paint={{
-            'line-color': '#3b9cff',
-            'line-width': 4,
-            'line-opacity': 0.75
-          }}
-        />
+      <Source id="route" type="geojson" data={routeData}>
+        {transportMode === 'driving' ? (
+          <Layer
+            id="route-driving"
+            type="line"
+            paint={{
+              'line-color': '#FF5722',
+              'line-width': 4,
+              'line-opacity': 0.8
+            }}
+            filter={['==', ['get', 'routeType'], 'driving']}
+          />
+        ) : (
+          <>
+            <Layer
+              id="route-walking"
+              type="line"
+              paint={{
+                'line-color': '#4CAF50',
+                'line-width': 4,
+                'line-dasharray': [2, 2]
+              }}
+              filter={['==', ['get', 'routeType'], 'walking']}
+            />
+            <Layer
+              id="route-transit"
+              type="line"
+              paint={{
+                'line-color': '#3F51B5',
+                'line-width': 6,
+                'line-opacity': 0.7
+              }}
+              filter={['==', ['get', 'routeType'], 'transit']}
+            />
+          </>
+        )}
       </Source>
     );
   };
 
+  const renderMarkers = () => (
+    <>
+      {startPoint && (
+        <Marker longitude={startPoint.lon} latitude={startPoint.lat}>
+          <div style={{ 
+            width: 16, 
+            height: 16, 
+            background: '#4CAF50', 
+            borderRadius: '50%', 
+            border: '2px solid white',
+            boxShadow: '0 0 5px rgba(0,0,0,0.3)'
+          }} />
+        </Marker>
+      )}
+
+      {endPoint && (
+        <Marker longitude={endPoint.lon} latitude={endPoint.lat}>
+          <div style={{ 
+            width: 16, 
+            height: 16, 
+            background: '#F44336', 
+            borderRadius: '50%', 
+            border: '2px solid white',
+            boxShadow: '0 0 5px rgba(0,0,0,0.3)'
+          }} />
+        </Marker>
+      )}
+    </>
+  );
+
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
-      {/* Panneau latéral */}
-      <div style={{
-        width: '350px',
-        padding: '20px',
-        backgroundColor: 'white',
-        boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
+      <div style={{ 
+        width: '350px', 
+        padding: '20px', 
+        backgroundColor: 'white', 
+        boxShadow: '2px 0 5px rgba(0,0,0,0.1)', 
+        overflowY: 'auto'
       }}>
-        <h2>Planificateur Multimodal</h2>
+        <h2>Planificateur de trajet</h2>
 
-        {/* Sélection des points de départ/arrivée */}
-        <div>
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={() => setTransportMode('driving')}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: transportMode === 'driving' ? '#2196F3' : '#eee',
+                color: transportMode === 'driving' ? 'white' : '#333',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Voiture
+            </button>
+            <button
+              onClick={() => setTransportMode('public')}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: transportMode === 'public' ? '#4CAF50' : '#eee',
+                color: transportMode === 'public' ? 'white' : '#333',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Transports Publics
+            </button>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
           <div style={{ marginBottom: '15px' }}>
             <h4>Départ</h4>
             <input
               type="text"
-              placeholder="Choisir le départ..."
+              placeholder="Adresse de départ..."
+              value={activeInput === 'start' ? searchQuery : (startPoint?.name || '')}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setActiveInput('start');
+              }}
+              onFocus={() => {
+                setActiveInput('start');
+                setSearchQuery(startPoint?.name || '');
+              }}
               style={{
                 width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
                 borderRadius: '4px'
               }}
-              onFocus={() => setSearchQuery('')}
-              value={startPoint ? (startPoint.name || startPoint.nom || startPoint.stop_name) : ''}
-              readOnly
             />
           </div>
 
@@ -298,111 +410,110 @@ export default function Itinerary() {
             <h4>Arrivée</h4>
             <input
               type="text"
-              placeholder="Choisir la destination..."
+              placeholder="Adresse d'arrivée..."
+              value={activeInput === 'end' ? searchQuery : (endPoint?.name || '')}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setActiveInput('end');
+              }}
+              onFocus={() => {
+                setActiveInput('end');
+                setSearchQuery(endPoint?.name || '');
+              }}
               style={{
                 width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
                 borderRadius: '4px'
               }}
-              onFocus={() => setSearchQuery('')}
-              value={endPoint ? (endPoint.name || endPoint.nom || endPoint.stop_name) : ''}
-              readOnly
             />
           </div>
-
-          <button 
-            onClick={calculateRoute}
-            disabled={!startPoint || !endPoint || isRouting}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              backgroundColor: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              width: '100%'
-            }}
-          >
-            {isRouting ? 'Calcul en cours...' : 'Calculer l\'itinéraire'}
-          </button>
         </div>
 
-        {/* Affichage des étapes */}
+        {activeInput && searchResults.length > 0 && (
+          <div style={{ marginBottom: '20px' }}>
+            {searchResults.slice(0, 5).map((result, index) => (
+              <div
+                key={index}
+                onClick={() => handleResultSelect(result)}
+                style={{
+                  padding: '10px',
+                  margin: '5px 0',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  border: '1px solid #eee'
+                }}
+              >
+                <div style={{ fontWeight: '500' }}>
+                  {result.type === 'geocoded' ? result.name : (result.nom || result.stop_name)}
+                </div>
+                <div style={{ fontSize: '0.8em', color: '#666' }}>
+                  {result.type === 'geocoded' ? 'Adresse' : result.type}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={calculateRoute}
+          disabled={!startPoint || !endPoint || isRouting}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: '#2196F3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginBottom: '20px'
+          }}
+        >
+          {isRouting ? 'Calcul en cours...' : 'Calculer l\'itinéraire'}
+        </button>
+
         {routeSteps.length > 0 && (
           <div>
             <h3>Instructions :</h3>
             <div style={{ marginTop: '10px' }}>
               {routeSteps.map((step, index) => (
-                <div key={index} style={{
-                  padding: '10px',
-                  margin: '5px 0',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '4px'
-                }}>
-                  {step.maneuver.instruction}
-                  <div style={{ color: '#666', fontSize: '0.9em' }}>
-                    Distance: {(step.distance / 1000).toFixed(1)} km
+                <div
+                  key={index}
+                  style={{
+                    padding: '10px',
+                    margin: '8px 0',
+                    backgroundColor: '#fff',
+                    borderRadius: '4px',
+                    borderLeft: `4px solid ${
+                      step.maneuver?.type === 'transit' ? '#3F51B5' : '#4CAF50'
+                    }`,
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {step.maneuver?.type === 'transit' ? (
+                      <span style={{ fontSize: '1.2em' }}>🚆</span>
+                    ) : (
+                      <span style={{ fontSize: '1.2em' }}>🚶</span>
+                    )}
+                    <div>
+                      <div>{step.maneuver?.instruction}</div>
+                      {step.distance > 0 && (
+                        <div style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>
+                          Distance : {(step.distance / 1000).toFixed(1)} km • 
+                          Durée : {Math.round(step.duration / 60)} min
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-
-        {/* Recherche de stations */}
-        <div>
-          <h4>Rechercher une station</h4>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher une station..."
-            style={{
-              width: '100%',
-              padding: '8px',
-              marginBottom: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px'
-            }}
-          />
-
-          {searchResults.slice(0, 5).map(station => (
-            <div
-              key={station.type === 'SNCF' ? station.codes_uic : station.stop_point_id}
-              style={{
-                padding: '8px',
-                margin: '4px 0',
-                backgroundColor: selectedStation?.codes_uic === station.codes_uic || 
-                               selectedStation?.stop_point_id === station.stop_point_id
-                               ? '#f0f0f0' : 'white',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-              onClick={() => {
-                setSelectedStation(station);
-                const coords = station.type === 'SNCF' 
-                  ? station.position_geographique 
-                  : station.stop_point_geopoint;
-                setViewport({
-                  longitude: coords.lon,
-                  latitude: coords.lat,
-                  zoom: 14,
-                  transitionDuration: 1000
-                });
-              }}
-            >
-              <div>{station.type === 'SNCF' ? station.nom : station.stop_name}</div>
-              <small style={{ color: '#666' }}>
-                {station.type === 'SNCF' ? 'Gare SNCF' : 'Station RATP'}
-              </small>
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Carte */}
       <div style={{ flexGrow: 1, position: 'relative' }}>
         <Map
           {...viewport}
