@@ -1,6 +1,8 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 
+
+
 export default function Reservation2() {
   const { state } = useLocation();
   const { billet } = state || {};
@@ -53,10 +55,11 @@ export default function Reservation2() {
               <div className="mt-4 text-center">
                 <p className="font-medium mb-2">QR Code pour bagages</p>
                 <img 
-                  src="../../images/QRCB.png" 
-                  alt="QR Code Bagage" 
-                  className="mx-auto w-32 h-32"
-                />
+  src={new URL("../../images/QRCB.png", import.meta.url)} 
+  alt="QR Code Bagage" 
+  className="mx-auto block w-32 h-32"
+/>
+
               </div>
 
               <p>
@@ -97,14 +100,16 @@ export default function Reservation2() {
               </div>
             )}
 
+
             {/* QR Code Client en bas de page */}
             <div className="text-center mt-8 pt-6 border-t">
               <h3 className="text-lg font-semibold mb-3">QR code réservation</h3>
               <img 
-                src="../../images/QRclient.png" 
-                alt="QR code réservation client" 
-                className="mx-auto w-36 h-36"
-              />
+  src={new URL("../../images/QRclient.png", import.meta.url)} 
+  alt="QR Code réservation client" 
+  className="mx-auto block w-36 h-36"
+/>
+
             </div>
           </div>
         )}
