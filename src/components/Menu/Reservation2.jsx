@@ -2,8 +2,8 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 
 export default function Reservation2() {
-  const { state } = useLocation(); // Récupère les données envoyées par navigate
-  const { billet } = state || {}; // Vérification pour éviter les erreurs si state est vide
+  const { state } = useLocation();
+  const { billet } = state || {};
 
   return (
     <div
@@ -49,6 +49,16 @@ export default function Reservation2() {
                 <strong>Nombre de Bagages :</strong>{" "}
                 {billet.numBags || "Non renseigné"}
               </p>
+              {/* QR Code Bagage */}
+              <div className="mt-4 text-center">
+                <p className="font-medium mb-2">QR Code pour bagages</p>
+                <img 
+                  src="../../images/QRCB.png" 
+                  alt="QR Code Bagage" 
+                  className="mx-auto w-32 h-32"
+                />
+              </div>
+
               <p>
                 <strong>Informations Supplémentaires :</strong>{" "}
                 {billet.additionalInfo || "Non renseigné"}
@@ -86,6 +96,16 @@ export default function Reservation2() {
                 </p>
               </div>
             )}
+
+            {/* QR Code Client en bas de page */}
+            <div className="text-center mt-8 pt-6 border-t">
+              <h3 className="text-lg font-semibold mb-3">QR code réservation</h3>
+              <img 
+                src="../../images/QRclient.png" 
+                alt="QR code réservation client" 
+                className="mx-auto w-36 h-36"
+              />
+            </div>
           </div>
         )}
       </div>
